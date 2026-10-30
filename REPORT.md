@@ -8,7 +8,7 @@
 
 ## 1. Project Objective
 
-Reproduce the core ideas from the DropML paper:
+Reproduce the core ideas from the CatDB paper:
 - Automatically generate a **Data Catalog** when a user uploads a CSV/Excel file
 - Pass the catalog to an LLM to **auto-generate and execute analysis code** based on user requests
 - Automatically recover from errors via a **Self-Healing** loop

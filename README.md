@@ -16,6 +16,14 @@
 
 </div>
 
+## 📚 Background
+
+DropML is a reproduction project based on the core ideas of
+**CatDB: Data-catalog-guided, LLM-based Generation of Data-centric ML Pipelines**
+(Fathollahzadeh, Mansour, Boehm, PVLDB 18(8), 2025).
+This is an independent re-implementation for learning purposes and is not
+affiliated with the original authors.
+
 ## ✨ What is DropML?
 
 DropML turns raw datasets into actionable insights **without writing a single line of code**.
