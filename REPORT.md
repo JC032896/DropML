@@ -1,7 +1,7 @@
-# ?“‘ DropML Project Development Report
+# ğŸ’§ DropML Project Development Report
 
 **Date**: April 4, 2026  
-**Project**: Reproducing DropML ??Intelligent Data Catalog & ML Pipeline Generator  
+**Project**: Reproducing DropML â€” Intelligent Data Catalog & ML Pipeline Generator  
 **Tech Stack**: Python, Streamlit, Pandas, Scikit-learn, Matplotlib, Seaborn, Gemini API, Ollama (Llama 3)
 
 ---
@@ -19,16 +19,16 @@ Reproduce the core ideas from the DropML paper:
 ## 2. System Architecture
 
 ```
-?“‚ File Upload (CSV/XLSX)
-  ???§¹ preprocessor.py ??7-Step Data Cleaning Pipeline
-  ???“Š profiler.py ??Data Catalog Extraction (Schema + Statistics + Missing Values)
-  ???§  app.py ??3-Tier Hybrid Routing
-  ??  ?œâ? [Tier 1] Keyword Priority Matching (instant, no LLM call)
-  ?œâ? [Tier 2] LLM Classification (template_id + params extraction)
-  ?”â? [Tier 3] Free-Form Code Generation (LLM writes Python directly)
-  ???“‹ templates.py ??10 Pre-Validated Code Templates + Fuzzy Matching
-  ???›¡ï¸?executor.py ??3-Layer Defense + Error Classification + Self-Healing
-  ???§  XAI ??Evidence-Based Analysis Explanation
+ğŸ“ File Upload (CSV/XLSX)
+  â””â”€â”€ preprocessor.py â”€â”€ 7-Step Data Cleaning Pipeline
+  â””â”€â”€ profiler.py â”€â”€ Data Catalog Extraction (Schema + Statistics + Missing Values)
+  â””â”€â”€ app.py â”€â”€ 3-Tier Hybrid Routing
+       â”œâ”€â”€ [Tier 1] Keyword Priority Matching (instant, no LLM call)
+       â”œâ”€â”€ [Tier 2] LLM Classification (template_id + params extraction)
+       â””â”€â”€ [Tier 3] Free-Form Code Generation (LLM writes Python directly)
+  â””â”€â”€ templates.py â”€â”€ 10 Pre-Validated Code Templates + Fuzzy Matching
+  â””â”€â”€ executor.py â”€â”€ 3-Layer Defense + Error Classification + Self-Healing
+  â””â”€â”€ XAI â”€â”€ Evidence-Based Analysis Explanation
 ```
 
 ---
@@ -38,7 +38,7 @@ Reproduce the core ideas from the DropML paper:
 | File | Role | Lines |
 |---|---|---|
 | `app.py` | Streamlit UI + Hybrid Routing + XAI | ~210 |
-| `executor.py` | Code Execution Engine (Parser ??Sandbox ??Self-Healing) | ~310 |
+| `executor.py` | Code Execution Engine (Parser â†’ Sandbox â†’ Self-Healing) | ~310 |
 | `templates.py` | 10 Validated Analysis Templates + Fuzzy Column Matching | ~410 |
 | `llm_client.py` | LLM Prompts (Generation / Classification / Self-Healing / XAI) | ~190 |
 | `profiler.py` | Data Catalog Generator (Schema, Statistics, Missing Values) | ~90 |
@@ -48,7 +48,7 @@ Reproduce the core ideas from the DropML paper:
 
 ## 4. Problems Encountered & Solutions
 
-### ?”´ Problem 1: `matplotlib.style` ??FileNotFoundError
+### ğŸ”´ Problem 1: `matplotlib.style` â†’ FileNotFoundError
 
 **Symptom**:
 ```
@@ -61,7 +61,7 @@ FileNotFoundError: [Errno 2] No such file or directory: 'seaborn'
 
 ---
 
-### ?”´ Problem 2: Scatter Plot ??RGBA ValueError
+### ğŸ”´ Problem 2: Scatter Plot â†’ RGBA ValueError
 
 **Symptom**:
 ```
@@ -76,7 +76,7 @@ ValueError: RGBA values should be within 0-1 range
 
 ---
 
-### ?”´ Problem 3: `df.fillna(df.mean())` ??TypeError
+### ğŸ”´ Problem 3: `df.fillna(df.mean())` â†’ TypeError
 
 **Symptom**:
 ```
@@ -86,13 +86,13 @@ TypeError: Cannot perform reduction 'mean' with string dtype
 **Root Cause**: The LLM habitually inserted `df.fillna(df.mean())` as a "safety" measure. However, calling `mean()` on a DataFrame containing string columns raises a TypeError.
 
 **Solution (Root Cause Elimination)**:
-1. Added a **NaN elimination step** to `preprocessor.py` (numeric columns ??median, string columns ??'Unknown')
+1. Added a **NaN elimination step** to `preprocessor.py` (numeric columns â†’ median, string columns â†’ 'Unknown')
 2. Updated LLM prompt: *"Data has NO NaN values. Do NOT use fillna() or dropna()"*
 3. Added `TypeError`-specific error classification in `executor.py` with targeted Self-Healing hints
 
 ---
 
-### ?”´ Problem 4: Column Name Mismatch ??KeyError
+### ğŸ”´ Problem 4: Column Name Mismatch â†’ KeyError
 
 **Symptom**:
 ```
@@ -104,28 +104,29 @@ KeyError: "['hours-per-week', 'education-num'] not in index"
 **Solution**: Implemented a **Fuzzy Matching** system in `templates.py`:
 ```
 Correction Process:
-1. Exact match: "hours-per-week" == "hours.per.week"? ????2. Normalized match: "hoursperweek" == "hoursperweek"? ????Match!
-3. Return: "hours.per.week" ??auto-corrected to actual column name
+1. Exact match: "hours-per-week" == "hours.per.week"? â”€â”€â–¶ âŒ No
+2. Normalized match: "hoursperweek" == "hoursperweek"? â”€â”€â–¶ âœ… Match!
+3. Return: "hours.per.week" â”€â”€â–¶ auto-corrected to actual column name
 ```
 
 ---
 
-### ?”´ Problem 5: LLM Misclassification ??`feature_importance` classified as `bar_chart`
+### ğŸ”´ Problem 5: LLM Misclassification â†’ `feature_importance` classified as `bar_chart`
 
 **Symptom**: The request "Show the top 5 most important variables" was classified as a simple bar chart instead of Feature Importance analysis.
 
 **Root Cause**: The LLM was misled by the keyword "bar chart" in the request and returned `bar_chart`. The keyword safety net ran *after* LLM classification, so it couldn't override the wrong answer.
 
-**Solution**: **Reversed the routing order** ??keyword matching now runs *before* LLM classification:
+**Solution**: **Reversed the routing order** â€” keyword matching now runs *before* LLM classification:
 ```
-[Tier 1] Keyword Priority ??"important variables" detected ??feature_importance (instant)
-[Tier 2] LLM Classification ??only handles requests not caught by keywords
-[Tier 3] Free-Form Generation ??fallback when neither matches
+[Tier 1] Keyword Priority â”€â”€â–¶ "important variables" detected â”€â”€â–¶ feature_importance (instant)
+[Tier 2] LLM Classification â”€â”€â–¶ only handles requests not caught by keywords
+[Tier 3] Free-Form Generation â”€â”€â–¶ fallback when neither matches
 ```
 
 ---
 
-### ?”´ Problem 6: `NameError: name 'parsed' is not defined`
+### ğŸ”´ Problem 6: `NameError: name 'parsed' is not defined`
 
 **Symptom**: When keyword matching determined the template (skipping LLM classification), the `parsed` variable was never created. Downstream code referenced `parsed`, causing a crash.
 
@@ -133,14 +134,14 @@ Correction Process:
 
 ---
 
-### ?”´ Problem 7: `string` dtype vs `object` dtype ??LabelEncoder Skipped
+### ğŸ”´ Problem 7: `string` dtype vs `object` dtype â†’ LabelEncoder Skipped
 
 **Symptom**:
 ```
 ValueError: could not convert string to float: 'Unknown'
 ```
 
-**Root Cause**: The ML templates checked `model_df[c].dtype == 'object'` to detect categorical columns. However, pandas' newer `StringDtype` (`'string'`) is distinct from `'object'` ??the check missed these columns, leaving raw strings that sklearn cannot process.
+**Root Cause**: The ML templates checked `model_df[c].dtype == 'object'` to detect categorical columns. However, pandas' newer `StringDtype` (`'string'`) is distinct from `'object'` â€” the check missed these columns, leaving raw strings that sklearn cannot process.
 
 **Solution**: Replaced the dtype check:
 ```python
@@ -155,7 +156,7 @@ if not pd.api.types.is_numeric_dtype(model_df[c]):
 
 ## 5. Key Architecture Decisions
 
-### 5.1 Hybrid Routing (Keyword ??LLM ??Free-Form)
+### 5.1 Hybrid Routing (Keyword â†’ LLM â†’ Free-Form)
 
 | Decision | Rationale |
 |---|---|
@@ -192,16 +193,16 @@ if not pd.api.types.is_numeric_dtype(model_df[c]):
 
 | # | Test Request | Routing | Result |
 |---|---|---|---|
-| 1 | Pie chart (occupation distribution) | ?¯ Template | ??Pass |
-| 2 | Bar chart (education vs hours-per-week) | ?¯ Template | ??Pass |
-| 3 | Histogram (age distribution) | ?¯ Template | ??Pass |
-| 4 | Value counts (marital status) | ?¯ Template | ??Pass |
-| 5 | Correlation heatmap | ?¯ Template | ??Pass |
-| 6 | Group statistics (race vs age) | ?¯ Template | ??Pass |
-| 7 | Top N values (highest hours-per-week) | ?¯ Template | ??Pass |
-| 8 | Classification model (income prediction) | ?¯ Template | ??Pass (98.9%) |
-| 9 | Feature importance (top 5 variables) | ?¯ Keyword Match | ??Pass |
-| 10 | Age-group income ratio (line chart) | ?”® Free-Form | ??Pass |
+| 1 | Pie chart (occupation distribution) | âš¡ Template | âœ… Pass |
+| 2 | Bar chart (education vs hours-per-week) | âš¡ Template | âœ… Pass |
+| 3 | Histogram (age distribution) | âš¡ Template | âœ… Pass |
+| 4 | Value counts (marital status) | âš¡ Template | âœ… Pass |
+| 5 | Correlation heatmap | âš¡ Template | âœ… Pass |
+| 6 | Group statistics (race vs age) | âš¡ Template | âœ… Pass |
+| 7 | Top N values (highest hours-per-week) | âš¡ Template | âœ… Pass |
+| 8 | Classification model (income prediction) | âš¡ Template | âœ… Pass (98.9%) |
+| 9 | Feature importance (top 5 variables) | âš¡ Keyword Match | âœ… Pass |
+| 10 | Age-group income ratio (line chart) | âš¡ Free-Form | âœ… Pass |
 
 **Final Success Rate: 10/10 (100%)**
 
